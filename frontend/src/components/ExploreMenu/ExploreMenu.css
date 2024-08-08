@@ -7,11 +7,12 @@
   color: #262626;
   font-weight: 600;
   letter-spacing: 1px;
+  font-size: 26px;
 }
 .explore-menu-text {
   max-width: 60%;
   columns: #808080;
-  font-size: 17px;
+  font-size: 16px;
 }
 .explore-menu-list {
   display: flex;
