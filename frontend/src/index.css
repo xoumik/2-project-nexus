@@ -17,6 +17,9 @@ a {
 .app {
   width: 80%;
   margin: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 @keyframes fadeIn {
   0% {
