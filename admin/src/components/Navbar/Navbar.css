@@ -1,0 +1,30 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4%;
+}
+.logo {
+  font-size: 26px;
+  color: tomato;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+  width: max(10%, 80px);
+}
+.logo:hover {
+  cursor: pointer;
+}
+.profile {
+  width: 40px;
+}
+.full-logo {
+  display: flex;
+  flex-direction: column;
+}
+.full-logo p {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: -8px;
+}
