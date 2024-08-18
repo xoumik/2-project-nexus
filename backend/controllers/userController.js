@@ -2,30 +2,46 @@ import userModel from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt, { genSalt } from "bcrypt";
 import validator from "validator";
+import { StatusCodes } from "http-status-codes";
+import { UnauthenticatedError } from "../errors/customErrors.js";
 
 //login user
+
+const createToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
+
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.json({ success: false, message: "User doesn't exist" });
+      throw new UnauthenticatedError("User doesn't exist");
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.json({ success: false, message: "Invalid Credentials" });
+      throw new UnauthenticatedError("invalid credentials");
     }
     const token = createToken(user._id);
-    res.json({ success: true, token });
+    const oneDay = 1000 * 60 * 60 * 24;
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: new Date(Date.now() + oneDay),
+    });
+    res
+      .status(StatusCodes.OK)
+      .json({ success: true, message: "User logged in" });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error" });
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ success: false, message: "Error" });
   }
 };
 
-const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET_TOKEN);
-};
 //register user
 const registerUser = async (req, res) => {
   const { name, password, email } = req.body;
@@ -48,7 +64,7 @@ const registerUser = async (req, res) => {
       });
     }
     //hashing user pass
-    const salt = await bcrypt.genSalt(10);
+    const salt = await genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     const newUser = new userModel({
       name: name,
@@ -56,11 +72,14 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
     });
     const user = await newUser.save();
-    const token = createToken(user._id);
-    res.json({ success: true, token });
+    res
+      .status(StatusCodes.CREATED)
+      .json({ success: true, message: "User registered" });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error" });
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ success: false, message: "Error" });
   }
 };
 export { loginUser, registerUser };
