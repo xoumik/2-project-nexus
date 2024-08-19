@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useState, useContext } from "react";
 import { toast } from "react-toastify";
 import "./LoginPopup.css";
 import { assets } from "../../assets/assets";
@@ -13,6 +13,7 @@ const LoginPopup = ({ setShowLogin, setUserName }) => {
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const onChangeHandler = (e) => {
     const name = e.target.name;
@@ -36,20 +37,23 @@ const LoginPopup = ({ setShowLogin, setUserName }) => {
           setCurrState("Login");
         } else {
           setUserName(response.data.name); // Set the username from the response
-          toast.success("Login successful!");
+          window.location.reload();
           setShowLogin(false);
         }
       } else {
         toast.error(response.data.message || "An error occurred");
       }
     } catch (error) {
-      // Log error details for debugging
       console.error(
         "Login error:",
         error.response ? error.response.data : error.message
       );
       toast.error("An error occurred. Please try again.");
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
   return (
@@ -60,13 +64,11 @@ const LoginPopup = ({ setShowLogin, setUserName }) => {
           <img
             onClick={() => setShowLogin(false)}
             src={assets.cross_icon}
-            alt=""
+            alt="Close"
           />
         </div>
         <div className="login-popup-inputs">
-          {currState === "Login" ? (
-            <></>
-          ) : (
+          {currState === "Login" ? null : (
             <input
               type="text"
               name="name"
@@ -84,14 +86,23 @@ const LoginPopup = ({ setShowLogin, setUserName }) => {
             placeholder="Your Email"
             required
           />
-          <input
-            name="password"
-            onChange={onChangeHandler}
-            value={data.password}
-            type="password"
-            placeholder="Password"
-            required
-          />
+          <div className="password-field">
+            <input
+              name="password"
+              onChange={onChangeHandler}
+              value={data.password}
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              required
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="password-toggle-text"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
         </div>
         <button type="submit">
           {currState === "Sign Up" ? "Create Account" : "Login"}

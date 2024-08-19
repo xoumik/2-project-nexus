@@ -1,14 +1,28 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify"; // Assuming you're using react-toastify for toast notifications
 import "./Navbar.css";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../context/StoreContext";
 
 const Navbar = ({ setShowLogin }) => {
   const [menu, setMenu] = useState("home");
-  const [username, setUsername] = useState(null); // State to store the username
+  const [username, setUsername] = useState(null);
   const { getTotalCartAmount, url } = useContext(StoreContext);
+
+  const logout = async () => {
+    try {
+      await axios.get(`${url}/api/user/logout`, {
+        withCredentials: true,
+      });
+      setUsername(null);
+      toast.success("Successfully logged out!");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      toast.error("Failed to log out. Please try again.");
+    }
+  };
 
   useEffect(() => {
     const fetchUsername = async () => {
@@ -16,7 +30,6 @@ const Navbar = ({ setShowLogin }) => {
         const response = await axios.get(`${url}/api/user/me`, {
           withCredentials: true,
         });
-        console.log("API Response:", response.data); // Log response data
         if (response.data.success) {
           setUsername(response.data.name);
         } else {
@@ -75,7 +88,23 @@ const Navbar = ({ setShowLogin }) => {
           <div className={getTotalCartAmount() === 0 ? "" : "dot"}></div>
         </div>
         {username ? (
-          <span className="username">{username}</span>
+          <div className="navbar-profile">
+            <div className="navbar-profile-name">
+              <img src={assets.profile_icon} alt="Profile" />
+              <p>{username}</p>
+            </div>
+            <ul className="nav-profile-dropdown">
+              <li>
+                <img src={assets.bag_icon} alt="Orders" />
+                <p>Orders</p>
+              </li>
+              <hr />
+              <li onClick={logout}>
+                <img src={assets.logout_icon} alt="Logout" />
+                Logout
+              </li>
+            </ul>
+          </div>
         ) : (
           <button onClick={() => setShowLogin(true)}>Sign In</button>
         )}

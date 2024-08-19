@@ -12,7 +12,6 @@ import "react-toastify/dist/ReactToastify.css";
 const App = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [userName, setUserName] = useState("");
-
   return (
     <>
       {showLogin ? (
