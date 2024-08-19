@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 export const authenticateUser = (req, res, next) => {
-  // Extract token from cookies
   const token = req.cookies.token;
 
   if (!token) {
@@ -9,15 +8,13 @@ export const authenticateUser = (req, res, next) => {
 
   try {
     // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach the decoded user to the request object
-    console.log(decoded);
+    const { id } = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id };
 
-    console.log("Token:", token); // Log the token for debugging
-
-    next(); // Proceed to the next middleware/route handler
+    //console.log("Token:", token);
+    next();
   } catch (err) {
-    console.error("Token verification failed:", err); // Log detailed error
+    console.error("Token verification failed:", err);
     res.status(401).json({ message: "Token is not valid" });
   }
 };

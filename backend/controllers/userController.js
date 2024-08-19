@@ -6,7 +6,6 @@ import { StatusCodes } from "http-status-codes";
 import { UnauthenticatedError } from "../errors/customErrors.js";
 
 //login user
-
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -31,9 +30,7 @@ const loginUser = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       expires: new Date(Date.now() + oneDay),
     });
-    res
-      .status(StatusCodes.OK)
-      .json({ success: true, message: "User logged in" });
+    res.status(200).json({ success: true, message: "User logged in" });
   } catch (error) {
     console.log(error);
     res
@@ -82,4 +79,19 @@ const registerUser = async (req, res) => {
       .json({ success: false, message: "Error" });
   }
 };
-export { loginUser, registerUser };
+
+const getUserDetails = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id); // Use req.user from authenticateUser middleware
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({ success: true, name: user.name });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export { loginUser, registerUser, getUserDetails };
