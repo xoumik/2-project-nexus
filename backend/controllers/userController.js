@@ -94,4 +94,12 @@ const getUserDetails = async (req, res) => {
   }
 };
 
-export { loginUser, registerUser, getUserDetails };
+const logOut = (req, res) => {
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.status(StatusCodes.OK).json({ success: true, msg: "user logged out! " });
+};
+
+export { loginUser, registerUser, getUserDetails, logOut };
