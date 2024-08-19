@@ -1,12 +1,36 @@
-import { useContext, useState } from "react";
-import { assets } from "../../assets/assets";
+import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import "./Navbar.css";
+import { assets } from "../../assets/assets";
 import { StoreContext } from "../../context/StoreContext";
 
 const Navbar = ({ setShowLogin }) => {
   const [menu, setMenu] = useState("home");
-  const { getTotalCartAmount } = useContext(StoreContext);
+  const [username, setUsername] = useState(null); // State to store the username
+  const { getTotalCartAmount, url } = useContext(StoreContext);
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const response = await axios.get(`${url}/api/user/me`, {
+          withCredentials: true,
+        });
+        console.log("API Response:", response.data); // Log response data
+        if (response.data.success) {
+          setUsername(response.data.name);
+        } else {
+          setUsername(null);
+        }
+      } catch (error) {
+        console.error("Error fetching username:", error);
+        setUsername(null);
+      }
+    };
+
+    fetchUsername();
+  }, [url]);
+
   return (
     <div className="navbar">
       <Link to="/">
@@ -43,16 +67,21 @@ const Navbar = ({ setShowLogin }) => {
         </a>
       </ul>
       <div className="navbar-right">
-        <img src={assets.search_icon} alt="" />
+        <img src={assets.search_icon} alt="Search" />
         <div className="navbar-search-icon">
           <Link to="/cart">
-            <img src={assets.basket_icon} alt="" />
+            <img src={assets.basket_icon} alt="Basket" />
           </Link>
-          <div className={getTotalCartAmount() == 0 ? "" : "dot"}></div>
+          <div className={getTotalCartAmount() === 0 ? "" : "dot"}></div>
         </div>
-        <button onClick={() => setShowLogin(true)}>Sign In</button>
+        {username ? (
+          <span className="username">{username}</span>
+        ) : (
+          <button onClick={() => setShowLogin(true)}>Sign In</button>
+        )}
       </div>
     </div>
   );
 };
+
 export default Navbar;
